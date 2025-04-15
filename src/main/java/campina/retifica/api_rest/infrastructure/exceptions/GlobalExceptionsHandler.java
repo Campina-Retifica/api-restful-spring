@@ -19,8 +19,8 @@ public class GlobalExceptionsHandler {
     }
 
     @ExceptionHandler(BadCredentialsException.class)
-    public ResponseEntity<Void> handlingIncorrectCredentials(BadCredentialsException exception) {
-        return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+    public ResponseEntity<UnauthorizedResponse> handlingIncorrectCredentials(BadCredentialsException exception) {
+        return new ResponseEntity<UnauthorizedResponse>(new UnauthorizedResponse("Credenciais inválidas."), HttpStatus.UNAUTHORIZED);
     }
 
     private record NullFieldsResponse(String field, String message) {
@@ -28,4 +28,6 @@ public class GlobalExceptionsHandler {
             this(error.getField(), error.getDefaultMessage());
         }
     }
+
+    private record UnauthorizedResponse(String message) {}
 }
