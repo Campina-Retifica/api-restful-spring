@@ -1,5 +1,6 @@
 package br.edu.unifacisa.projeto_integrador.authentication;
 
+import br.edu.unifacisa.projeto_integrador.security.TokenDTO;
 import br.edu.unifacisa.projeto_integrador.user.UserLoginDTO;
 import br.edu.unifacisa.projeto_integrador.user.UserService;
 import jakarta.validation.Valid;
@@ -17,8 +18,7 @@ public class AuthenticationController {
     private final UserService userService;
 
     @PostMapping
-    public ResponseEntity<Void> login(@RequestBody @Valid UserLoginDTO body) {
-        userService.login(body);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<TokenDTO> login(@RequestBody @Valid UserLoginDTO body) {
+        return ResponseEntity.ok(userService.login(body));
     }
 }
