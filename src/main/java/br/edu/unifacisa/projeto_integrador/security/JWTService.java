@@ -1,5 +1,6 @@
 package br.edu.unifacisa.projeto_integrador.security;
 
+import br.edu.unifacisa.projeto_integrador.user.User;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
@@ -16,13 +17,13 @@ public class JWTService {
     @Value("${api.security.secret-key}")
     private String secretKey;
 
-    public String create(String username) {
+    public String create(User user) {
         try {
             Algorithm algorithm = Algorithm.HMAC256(secretKey);
             String token = JWT
                     .create()
                     .withIssuer("integrative-project")
-                    .withSubject(username)
+                    .withSubject(user.getUsername())
                     .withExpiresAt(genExpirationTime())
                     .sign(algorithm);
             return token;
