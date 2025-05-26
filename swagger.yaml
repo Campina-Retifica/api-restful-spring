@@ -1,0 +1,299 @@
+openapi: 3.0.3
+info:
+  title: Campina Retífica - Restful API
+  version: "1.0"
+  description: API seguindo a arquitetura REST para um sistema de gestão de clientes e serviços de uma retífica.
+servers:
+  - url: http://localhost:8080/
+    description: Servidor Local
+
+tags:
+  - name: Usuários
+    description: Operações relacionadas a usuários
+  - name: Clientes
+    description: Operações relacionadas a clientes da retífica
+  - name: Servicos
+    description: Operações relacionadas a serviços da retífica
+
+paths:
+  /api/usuarios:
+    get:
+      tags: [Usuários]
+      summary: Listar usuários
+      operationId: listarUsuarios
+      responses:
+        "200":
+          description: Listagem bem-sucedida!
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Usuario"
+  /api/usuarios/auth:
+    post:
+      tags: [Usuários]
+      summary: Login de usuário
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                senha:
+                  type: string
+              required:
+                - email
+                - senha
+      responses:
+        "200":
+          description: Login bem-sucedido
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+        "401":
+          description: Unauthorized
+  /api/clientes:
+    get:
+      tags: [Clientes]
+      summary: Listagem de clientes da retífica
+      operationId: listarClientes
+      responses:
+        "200":
+          description: Listagem bem-sucedida!
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Cliente"
+    post:
+      tags: [Clientes]
+      summary: Cadastro de um cliente à retífica
+      operationId: criarCliente
+      responses:
+        "201":
+          description: Cadastro realizado com sucesso!
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /api/clientes/:id:
+    get:
+      tags: [Clientes]
+      summary: Listagem de um cliente da retífica
+      operationId: listaClientePeloId
+      responses:
+        "200":
+          description: Cliente listado com sucesso!
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Cliente"
+        "404":
+          description: Cliente não encontrado.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+    put:
+      tags: [Clientes]
+      summary: Atualização de um cliente da retífica
+      operationId: atualizaUsuarioPeloId
+      responses:
+        "200":
+          description: Cliente atualizado com sucesso!
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Cliente"
+        "404":
+          description: Cliente não encontrado.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /api/servicos:
+    get:
+      tags: [Servicos]
+      summary: Listagem de serviços da retífica
+      operationId: listarServicos
+      responses:
+        "200":
+          description: Serviços listados com sucesso!
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Servico"
+    post:
+      tags: [Servicos]
+      summary: Cadastro de um serviço à retífica
+      operationId: criarServico
+      responses:
+        "201":
+          description: Cadastro de um serviço à retífica
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /api/servicos/:id:
+    get:
+      tags: [Servicos]
+      summary: Listagem de um serviço da retífica
+      operationId: listaServicoPeloId
+      responses:
+        "200":
+          description: Serviço listado com sucesso!
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Servico"
+        "404":
+          description: Serviço não encontrado.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+    put:
+      tags: [Servicos]
+      summary: Atualização de um serviço da retífica
+      operationId: atualizaServicoPeloId
+      responses:
+        "200":
+          description: Serviço atualizado com sucesso!
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Servico"
+        "404":
+          description: Serviço não encontrado.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+    delete:
+      tags: [Servicos]
+      summary: Remoção de um serviço da retífica
+      operationId: removeServicoPeloId
+      responses:
+        "204":
+          description: Serviço com status alterado para 'inativo'.
+        "404":
+          description: Serviço não encontrado.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+components:
+  schemas:
+    Usuario:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID único do usuário
+        nome:
+          type: string
+          description: Nome do usuário
+        senha:
+          type: string
+          description: Senha criptografada
+      required:
+        - id
+        - nome
+        - senha
+    Cliente:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID único do usuário
+        primeiro_nome:
+          type: string
+          description: Primeiro nome do usuário
+        nome_do_meio:
+          type: string
+          description: Nome do meio do usuário
+        ultimo_nome:
+          type: string
+          description: Último nome do usuário
+        documento:
+          type: string
+          description: CPF ou CNPJ do cliente
+        email:
+          type: string
+          description: Email do cliente
+        telefone:
+          type: string
+          description: Telefone do cliente
+        id_endereco:
+          type: string
+          description: Id do endereço do cliente
+        status:
+          type: string
+          description: Status do cliente
+      required:
+        - id
+        - primeiro_nome
+        - nome_do_meio
+        - ultimo_nome
+        - telefone
+        - id_endereco
+    Servico:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID único do serviço
+        nome:
+          type: string
+          description: Nome do serviço
+        descricao:
+          type: string
+          description: Descrição do serviço
+        valor:
+          type: number
+          description: Valor do serviço
+        status:
+          type: string
+          description: Status do serviço
+      required:
+        - id
+        - nome
+        - descricao
+        - valor
