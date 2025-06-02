@@ -2,8 +2,11 @@ package br.edu.unifacisa.projeto_integrador.services;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "tb_services")
@@ -22,6 +25,10 @@ public class OfferedService {
     @Column(name = "service_value", nullable = false)
     private BigDecimal value;
     private OfferedServiceEnum status = OfferedServiceEnum.PENDENTE;
+    @CreationTimestamp
+    private LocalDateTime created;
+    @UpdateTimestamp
+    private LocalDateTime updated;
 
 
     public OfferedService (OfferedServiceRequest request) {
