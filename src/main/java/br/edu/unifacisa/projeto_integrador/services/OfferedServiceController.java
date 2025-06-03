@@ -38,7 +38,7 @@ public class OfferedServiceController {
     public ResponseEntity<Void> updateService (@PathVariable Long id,
                                                @RequestBody OfferedServiceRequestUpdate requestUpdate) {
         service.updateService(id,requestUpdate);
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @PatchMapping("/cancel/{id}")

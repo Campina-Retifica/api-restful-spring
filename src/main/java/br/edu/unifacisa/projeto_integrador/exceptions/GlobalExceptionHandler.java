@@ -1,5 +1,6 @@
 package br.edu.unifacisa.projeto_integrador.exceptions;
 
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -23,6 +24,12 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.badRequest().body(errors.stream().map(DataErrorValidation::new).toList());
     }
+
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<Void> handleEntityNotFoundException(EntityNotFoundException ex){
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
 
     public record DataErrorValidation(String field, String message) {
         public DataErrorValidation(FieldError error) {

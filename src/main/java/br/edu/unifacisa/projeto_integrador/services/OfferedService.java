@@ -24,6 +24,8 @@ public class OfferedService {
     private String description;
     @Column(name = "service_value", nullable = false)
     private BigDecimal value;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
     private OfferedServiceEnum status = OfferedServiceEnum.PENDENTE;
     @CreationTimestamp
     private LocalDateTime created;
