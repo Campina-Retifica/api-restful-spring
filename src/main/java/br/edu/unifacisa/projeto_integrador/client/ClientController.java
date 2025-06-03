@@ -1,5 +1,6 @@
 package br.edu.unifacisa.projeto_integrador.client;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,26 +17,24 @@ public class ClientController {
     }
 
     @GetMapping
-    public List<Client> listAll() {
-        return clientService.listAll();
+    public ResponseEntity<List<Client>> listAll() {
+        return ResponseEntity.ok(clientService.listAll());
     }
 
     @PostMapping
-    public Client createClient(Client client) {
-        return clientService.createClient(client);
+    public ResponseEntity<Client> createClient(Client client) {
+        return new ResponseEntity<>(clientService.createClient(client), HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Client> searchId(@PathVariable Long id) {
-        return clientService.searchId(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return ResponseEntity.ok(clientService.searchId(id));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Client> updateClient(@PathVariable Long id, @RequestBody Client clientUpdate) {
-        return clientService.updateClient(id, clientUpdate)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    @PatchMapping("/{id}")
+    public ResponseEntity<Void> updateClient(@PathVariable Long id, @RequestBody Client clientUpdate) {
+        clientService.updateClient(id, clientUpdate);
+        return ResponseEntity.noContent().build();
     }
+
 }
