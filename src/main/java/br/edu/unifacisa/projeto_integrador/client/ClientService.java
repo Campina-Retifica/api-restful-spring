@@ -1,5 +1,6 @@
 package br.edu.unifacisa.projeto_integrador.client;
 
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,8 +19,8 @@ public class ClientService {
         return clientRepository.findAll();
     }
 
-    public Optional<Client> searchId(Long id) {
-        return clientRepository.findById(id);
+    public Client searchId(Long id) {
+        return clientRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("id not found."));
     }
 
     public Client createClient(Client client) {
