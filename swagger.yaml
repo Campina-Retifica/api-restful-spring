@@ -14,6 +14,10 @@ tags:
     description: Operações relacionadas a clientes da retífica
   - name: Servicos
     description: Operações relacionadas a serviços da retífica
+  - name: ServicosPrestados
+    description: Operações relacionadas a serviços prestados pela retífica a determinado cliente
+  - name: Enderecos
+    description: Operações relacionadas ao endereço de um cliente da retífica.
 
 paths:
   /api/usuarios:
@@ -29,7 +33,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/Usuario"
+                  $ref: "#/components/schemas/Usuarios"
   /api/usuarios/auth:
     post:
       tags: [Usuários]
@@ -42,12 +46,12 @@ paths:
             schema:
               type: object
               properties:
-                email:
+                nome:
                   type: string
                 senha:
                   type: string
               required:
-                - email
+                - nome
                 - senha
       responses:
         "200":
@@ -59,8 +63,17 @@ paths:
                 properties:
                   token:
                     type: string
+                    example: eyz717238123jdsad721239y293i231394
         "401":
           description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Credênciais Inválidas!
   /api/clientes:
     get:
       tags: [Clientes]
@@ -74,11 +87,39 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/Cliente"
+                  $ref: "#/components/schemas/Clientes"
     post:
       tags: [Clientes]
       summary: Cadastro de um cliente à retífica
       operationId: criarCliente
+      requestBody:
+        description: Dados necessários para criar um novo cliente
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - primeiro_nome
+                - ultimo_nome
+                - telefone
+              properties:
+                primeiro_nome:
+                  type: string
+                  example: Francinaldo
+                  description: Primeiro nome do cliente
+                nome_do_meio:
+                  type: string
+                  example: Batista da Silva
+                  description: Nome do meio do cliente
+                ultimo_nome:
+                  type: string
+                  example: Filho
+                  description: Último nome do cliente
+                telefone:
+                  type: string
+                  example: +55 83 98888-8888
+                  description: Telefone para contato com o cliente
       responses:
         "201":
           description: Cadastro realizado com sucesso!
@@ -89,11 +130,30 @@ paths:
                 properties:
                   message:
                     type: string
-  /api/clientes/:id:
+                    default: Cliente criado com sucesso!
+                  cliente:
+                    $ref: "#/components/schemas/Clientes"
+        "400":
+          description: Houve algo errado com o cadastro!
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    default: Houve algo de errado ao criar o cliente.
+  /api/clientes/:{id}:
     get:
       tags: [Clientes]
       summary: Listagem de um cliente da retífica
       operationId: listaClientePeloId
+      parameters:
+        - name: id
+          required: true
+          schema:
+            type: string
+          in: path
       responses:
         "200":
           description: Cliente listado com sucesso!
@@ -102,7 +162,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/Cliente"
+                  $ref: "#/components/schemas/Clientes"
         "404":
           description: Cliente não encontrado.
           content:
@@ -112,17 +172,24 @@ paths:
                 properties:
                   message:
                     type: string
+                    default: "Cliente não encontrado."
     put:
       tags: [Clientes]
       summary: Atualização de um cliente da retífica
       operationId: atualizaUsuarioPeloId
+      parameters:
+        - name: id
+          required: true
+          schema:
+            type: string
+          in: path
       responses:
         "200":
           description: Cliente atualizado com sucesso!
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Cliente"
+                $ref: "#/components/schemas/Clientes"
         "404":
           description: Cliente não encontrado.
           content:
@@ -132,6 +199,7 @@ paths:
                 properties:
                   message:
                     type: string
+                    default: "Cliente não encontrado."
   /api/servicos:
     get:
       tags: [Servicos]
@@ -145,14 +213,38 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/Servico"
+                  $ref: "#/components/schemas/Servicos"
     post:
       tags: [Servicos]
       summary: Cadastro de um serviço à retífica
       operationId: criarServico
+      requestBody:
+        description: Dados necessários para criar um novo serviço
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - nome
+                - descricao
+                - valor
+              properties:
+                nome:
+                  type: string
+                  example: Trocar correia dentada
+                  description: Nome único do serviço
+                descricao:
+                  type: string
+                  example: Nesse serviço, realizamos a troca da correia dentada por uma nova em conjunto com x e y.
+                  description: Descrição do serviço prestado
+                valor:
+                  type: number
+                  example: 50
+                  description: Valor que o cliente precisa pagar pelo serviço
       responses:
         "201":
-          description: Cadastro de um serviço à retífica
+          description: Cadastro realizado com sucesso!
           content:
             application/json:
               schema:
@@ -160,11 +252,30 @@ paths:
                 properties:
                   message:
                     type: string
-  /api/servicos/:id:
+                    default: Serviço criado com sucesso.
+                  servico:
+                    $ref: "#/components/schemas/Servicos"
+        "400":
+          description: O cadastro não foi bem-sucedido.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    default: Houve algo de errado ao criar o serviço.
+  /api/servicos/:{id}:
     get:
       tags: [Servicos]
       summary: Listagem de um serviço da retífica
       operationId: listaServicoPeloId
+      parameters:
+        - name: id
+          required: true
+          schema:
+            type: string
+          in: path
       responses:
         "200":
           description: Serviço listado com sucesso!
@@ -173,7 +284,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/Servico"
+                  $ref: "#/components/schemas/Servicos"
         "404":
           description: Serviço não encontrado.
           content:
@@ -183,17 +294,24 @@ paths:
                 properties:
                   message:
                     type: string
+                    default: "Serviço não encontrado."
     put:
       tags: [Servicos]
       summary: Atualização de um serviço da retífica
       operationId: atualizaServicoPeloId
+      parameters:
+        - name: id
+          required: true
+          schema:
+            type: string
+          in: path
       responses:
         "200":
           description: Serviço atualizado com sucesso!
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Servico"
+                $ref: "#/components/schemas/Servicos"
         "404":
           description: Serviço não encontrado.
           content:
@@ -203,10 +321,17 @@ paths:
                 properties:
                   message:
                     type: string
+                    default: "Serviço não encontrado."
     delete:
       tags: [Servicos]
       summary: Remoção de um serviço da retífica
       operationId: removeServicoPeloId
+      parameters:
+        - name: id
+          required: true
+          schema:
+            type: string
+          in: path
       responses:
         "204":
           description: Serviço com status alterado para 'inativo'.
@@ -219,25 +344,336 @@ paths:
                 properties:
                   message:
                     type: string
+                    default: "Serviço não encontrado."
+  /api/servicosPrestados:
+    get:
+      tags: [ServicosPrestados]
+      summary: Listagem de serviços prestados pela retífica
+      operationId: listarServicosPrestados
+      responses:
+        "200":
+          description: Serviços prestados listados com sucesso!
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ServicosPrestados"
+    post:
+      tags: [ServicosPrestados]
+      summary: Cadastro de um serviço prestado pela retífica
+      operationId: criarServicoPrestado
+      requestBody:
+        description: Dados necessários para criar um novo serviço prestado
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - id_servico
+                - id_cliente
+                - data_inicio
+              properties:
+                id_servico:
+                  type: string
+                  example: 123
+                  description: ID único do serviço
+                id_cliente:
+                  type: string
+                  example: 9
+                  description: ID único do cliente
+                data_inicio:
+                  type: string
+                  example: 2025-04-13
+                  description: Data de ínicio do serviço
+      responses:
+        "201":
+          description: Cadastro realizado com sucesso!
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    default: Serviço prestado criado com sucesso.
+                  servicoPrestado:
+                    $ref: "#/components/schemas/ServicosPrestados"
+        "400":
+          description: O cadastro não foi bem-sucedido.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    default: Houve algo de errado ao criar o serviço prestado.
+  /api/servicosPrestados/:{id}:
+    get:
+      tags: [ServicosPrestados]
+      summary: Listagem de um serviço presado pela retífica
+      operationId: listaServicoPrestadoPeloId
+      parameters:
+        - name: id
+          required: true
+          schema:
+            type: string
+          in: path
+      responses:
+        "200":
+          description: Serviço prestado listado com sucesso!
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ServicosPrestados"
+        "404":
+          description: Serviço prestado não encontrado.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    default: "Serviço prestado não encontrado."
+    put:
+      tags: [ServicosPrestados]
+      summary: Atualização de um serviço prestado pela retífica
+      operationId: atualizaServicoPrestadoPeloId
+      parameters:
+        - name: id
+          required: true
+          schema:
+            type: string
+          in: path
+      responses:
+        "200":
+          description: Serviço prestado atualizado com sucesso!
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServicosPrestados"
+        "404":
+          description: Serviço prestado não encontrado.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    default: "Serviço prestado não encontrado."
+    delete:
+      tags: [ServicosPrestados]
+      summary: Remoção de um serviço prestado da retífica
+      operationId: removeServicoPrestadoPeloId
+      parameters:
+        - name: id
+          required: true
+          schema:
+            type: string
+          in: path
+      responses:
+        "204":
+          description: Serviço prestado com status alterado para 'cancelado'.
+        "404":
+          description: Serviço não encontrado.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    default: "Serviço prestado não encontrado."
+  /api/enderecos:
+    get:
+      tags: [Enderecos]
+      summary: Listagem de endereços de clientes da retífica
+      operationId: listarEnderecos
+      responses:
+        "200":
+          description: Serviços prestados listados com sucesso!
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Enderecos"
+    post:
+      tags: [Enderecos]
+      summary: Cadastro de um endereço de cliente da retífica
+      operationId: criarEndereco
+      requestBody:
+        description: Dados necessários para criar um novo serviço prestado
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - id_cliente
+                - bairro
+                - cidade
+                - rua
+              properties:
+                id_cliente:
+                  type: string
+                  example: 9
+                  description: ID único do cliente
+                rua:
+                  type: string
+                  example: R. 7 de Setembro
+                  description: Rua ou avenida na qual o cliente reside
+                numero:
+                  type: number
+                  example: 7
+                  description: Número da casa ou apartamento
+                bairro:
+                  type: string
+                  example: Centro
+                  description: Bairro no qual o cliente reside
+                complemento:
+                  type: string
+                  example: Apartamento X em frente a Y.
+                  description: Complemento do endereço do cliente
+                cidade:
+                  type: string
+                  example: Campina Grande
+                  description: Cidade na qual o cliente reside
+                estado:
+                  type: string
+                  example: Paraíba
+                  description: Estado no qual o cliente reside
+      responses:
+        "201":
+          description: Cadastro realizado com sucesso!
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    default: Endereço de cliente criado com sucesso.
+                  servicoPrestado:
+                    $ref: "#/components/schemas/Enderecos"
+        "400":
+          description: O cadastro não foi bem-sucedido.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    default: Houve algo de errado ao criar o endereço do cliente.
+  /api/enderecos/:{id}:
+    get:
+      tags: [Enderecos]
+      summary: Listagem de um Endereço de cliente pela retífica
+      operationId: listaEnderecoPeloId
+      parameters:
+        - name: id
+          required: true
+          schema:
+            type: string
+          in: path
+      responses:
+        "200":
+          description: Endereço de cliente listado com sucesso!
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Enderecos"
+        "404":
+          description: Endereço de cliente não encontrado.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    default: "Endereço de cliente não encontrado."
+    put:
+      tags: [Enderecos]
+      summary: Atualização de um Endereço de cliente pela retífica
+      operationId: atualizaEnderecoPeloId
+      parameters:
+        - name: id
+          required: true
+          schema:
+            type: string
+          in: path
+      responses:
+        "200":
+          description: Endereço de cliente atualizado com sucesso!
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Enderecos"
+        "404":
+          description: Endereço de cliente não encontrado.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    default: "Endereço de cliente não encontrado."
+    delete:
+      tags: [Enderecos]
+      summary: Remoção de um Endereço de cliente da retífica
+      operationId: removeEnderecoPeloId
+      parameters:
+        - name: id
+          required: true
+          schema:
+            type: string
+          in: path
+      responses:
+        "204":
+          description: Endereço de cliente com status alterado para 'cancelado'.
+        "404":
+          description: Endereço de cliente não encontrado.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    default: "Endereço de cliente não encontrado."
 components:
   schemas:
-    Usuario:
+    Usuarios:
       type: object
       properties:
         id:
           type: string
           description: ID único do usuário
+          example: "u812382391iseh1723dpu828123"
         nome:
           type: string
           description: Nome do usuário
+          example: "Francinaldo"
         senha:
           type: string
           description: Senha criptografada
+          example: "*******"
       required:
         - id
         - nome
         - senha
-    Cliente:
+    Clientes:
       type: object
       properties:
         id:
@@ -267,6 +703,7 @@ components:
         status:
           type: string
           description: Status do cliente
+          default: ativo
       required:
         - id
         - primeiro_nome
@@ -274,7 +711,7 @@ components:
         - ultimo_nome
         - telefone
         - id_endereco
-    Servico:
+    Servicos:
       type: object
       properties:
         id:
@@ -297,3 +734,63 @@ components:
         - nome
         - descricao
         - valor
+    ServicosPrestados:
+      type: object
+      properties:
+        id_servico:
+          type: string
+          description: ID único do serviço
+        id_cliente:
+          type: string
+          description: ID único do cliente
+        data_inicio:
+          type: string
+          description: Data de ínicio do serviço
+        data_fim:
+          type: string
+          description: Data de finalização do serviço. (Só é permitido que exista uma data_fim, se o status estiver no estado 'concluido'.)
+        status:
+          type: string
+          default: pendente
+          description: Status do serviço que será um enum [”pendente”, ”em andamento”, “concluído”, “cancelado”]
+        pago:
+          type: boolean
+          default: false
+          description: O serviço foi pago?
+      required:
+        - id_servico
+        - id_cliente
+        - data_inicio
+    Enderecos:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID único do endereço
+        id_cliente:
+          type: string
+          description: ID único do cliente
+        rua:
+          type: string
+          description: Rua ou avenida na qual o cliente reside
+        numero:
+          type: number
+          description: Número da casa ou apartamento
+        bairro:
+          type: string
+          description: Bairro no qual o cliente reside
+        complemento:
+          type: string
+          description: Complemento do endereço do cliente
+        cidade:
+          type: string
+          description: Cidade na qual o cliente reside
+        estado:
+          type: string
+          description: Estado no qual o cliente reside
+      required:
+        - id
+        - id_cliente
+        - rua
+        - bairro
+        - cidade
