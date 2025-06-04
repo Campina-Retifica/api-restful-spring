@@ -1,4 +1,4 @@
-package br.edu.unifacisa.projeto_integrador.services;
+package br.edu.unifacisa.projeto_integrador.offered_service;
 
 import jakarta.validation.constraints.NotNull;
 

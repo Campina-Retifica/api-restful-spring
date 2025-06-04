@@ -1,6 +1,6 @@
 package br.edu.unifacisa.projeto_integrador.authentication;
 
-import br.edu.unifacisa.projeto_integrador.security.TokenDTO;
+import br.edu.unifacisa.projeto_integrador.token.TokenDTO;
 import br.edu.unifacisa.projeto_integrador.user.UserLoginDTO;
 import br.edu.unifacisa.projeto_integrador.user.UserService;
 import jakarta.validation.Valid;
