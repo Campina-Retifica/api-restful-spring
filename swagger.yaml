@@ -1,796 +1,564 @@
-openapi: 3.0.3
+openapi: 3.1.0
 info:
   title: Campina Retífica - Restful API
-  version: "1.0"
+  version: v0
   description: API seguindo a arquitetura REST para um sistema de gestão de clientes e serviços de uma retífica.
 servers:
-  - url: http://localhost:8080/
-    description: Servidor Local
-
-tags:
-  - name: Usuários
-    description: Operações relacionadas a usuários
-  - name: Clientes
-    description: Operações relacionadas a clientes da retífica
-  - name: Servicos
-    description: Operações relacionadas a serviços da retífica
-  - name: ServicosPrestados
-    description: Operações relacionadas a serviços prestados pela retífica a determinado cliente
-  - name: Enderecos
-    description: Operações relacionadas ao endereço de um cliente da retífica.
-
+  - url: http://localhost:8080
+    description: Localhost
 paths:
-  /api/usuarios:
+  /services:
     get:
-      tags: [Usuários]
-      summary: Listar usuários
-      operationId: listarUsuarios
+      tags:
+        - offered-service-controller
+      operationId: findAllServices
+      parameters:
+        - name: pageable
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/Pageable'
       responses:
-        "200":
-          description: Listagem bem-sucedida!
+        '200':
+          description: OK
           content:
-            application/json:
+            '*/*':
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Usuarios"
-  /api/usuarios/auth:
+                $ref: '#/components/schemas/PageOfferedServiceDTO'
     post:
-      tags: [Usuários]
-      summary: Login de usuário
+      tags:
+        - offered-service-controller
+      operationId: createService
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OfferedServiceRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/OfferedServiceDTO'
+  /provided-services:
+    get:
+      tags:
+        - provided-service-controller
+      operationId: findAll
+      parameters:
+        - name: pageable
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/Pageable'
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/PageProvidedServiceResponse'
+    post:
+      tags:
+        - provided-service-controller
+      operationId: save
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProvidedServiceRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProvidedServiceResponse'
+  /customers:
+    get:
+      tags:
+        - customer-controller
+      operationId: listAllCustomers
+      parameters:
+        - name: pageable
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/Pageable'
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/PageCustomerDTO'
+    post:
+      tags:
+        - customer-controller
+      operationId: createCustomer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomerDTO'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/CustomerDTO'
+  /auth:
+    post:
+      tags:
+        - authentication-controller
       operationId: login
       requestBody:
-        required: true
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                nome:
-                  type: string
-                senha:
-                  type: string
-              required:
-                - nome
-                - senha
+              $ref: '#/components/schemas/UserLoginDTO'
+        required: true
       responses:
-        "200":
-          description: Login bem-sucedido
+        '200':
+          description: OK
           content:
-            application/json:
+            '*/*':
               schema:
-                type: object
-                properties:
-                  token:
-                    type: string
-                    example: eyz717238123jdsad721239y293i231394
-        "401":
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: Credênciais Inválidas!
-  /api/clientes:
+                $ref: '#/components/schemas/TokenDTO'
+  /services/{id}:
     get:
-      tags: [Clientes]
-      summary: Listagem de clientes da retífica
-      operationId: listarClientes
+      tags:
+        - offered-service-controller
+      operationId: findServiceById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
       responses:
-        "200":
-          description: Listagem bem-sucedida!
+        '200':
+          description: OK
           content:
-            application/json:
+            '*/*':
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Clientes"
-    post:
-      tags: [Clientes]
-      summary: Cadastro de um cliente à retífica
-      operationId: criarCliente
+                $ref: '#/components/schemas/OfferedServiceDTO'
+    patch:
+      tags:
+        - offered-service-controller
+      operationId: updateService
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
       requestBody:
-        description: Dados necessários para criar um novo cliente
-        required: true
         content:
           application/json:
             schema:
-              type: object
-              required:
-                - primeiro_nome
-                - ultimo_nome
-                - telefone
-              properties:
-                primeiro_nome:
-                  type: string
-                  example: Francinaldo
-                  description: Primeiro nome do cliente
-                nome_do_meio:
-                  type: string
-                  example: Batista da Silva
-                  description: Nome do meio do cliente
-                ultimo_nome:
-                  type: string
-                  example: Filho
-                  description: Último nome do cliente
-                telefone:
-                  type: string
-                  example: +55 83 98888-8888
-                  description: Telefone para contato com o cliente
-      responses:
-        "201":
-          description: Cadastro realizado com sucesso!
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    default: Cliente criado com sucesso!
-                  cliente:
-                    $ref: "#/components/schemas/Clientes"
-        "400":
-          description: Houve algo errado com o cadastro!
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    default: Houve algo de errado ao criar o cliente.
-  /api/clientes/:{id}:
-    get:
-      tags: [Clientes]
-      summary: Listagem de um cliente da retífica
-      operationId: listaClientePeloId
-      parameters:
-        - name: id
-          required: true
-          schema:
-            type: string
-          in: path
-      responses:
-        "200":
-          description: Cliente listado com sucesso!
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Clientes"
-        "404":
-          description: Cliente não encontrado.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    default: "Cliente não encontrado."
-    put:
-      tags: [Clientes]
-      summary: Atualização de um cliente da retífica
-      operationId: atualizaUsuarioPeloId
-      parameters:
-        - name: id
-          required: true
-          schema:
-            type: string
-          in: path
-      responses:
-        "200":
-          description: Cliente atualizado com sucesso!
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Clientes"
-        "404":
-          description: Cliente não encontrado.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    default: "Cliente não encontrado."
-  /api/servicos:
-    get:
-      tags: [Servicos]
-      summary: Listagem de serviços da retífica
-      operationId: listarServicos
-      responses:
-        "200":
-          description: Serviços listados com sucesso!
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Servicos"
-    post:
-      tags: [Servicos]
-      summary: Cadastro de um serviço à retífica
-      operationId: criarServico
-      requestBody:
-        description: Dados necessários para criar um novo serviço
+              $ref: '#/components/schemas/OfferedServiceDTO'
         required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - nome
-                - descricao
-                - valor
-              properties:
-                nome:
-                  type: string
-                  example: Trocar correia dentada
-                  description: Nome único do serviço
-                descricao:
-                  type: string
-                  example: Nesse serviço, realizamos a troca da correia dentada por uma nova em conjunto com x e y.
-                  description: Descrição do serviço prestado
-                valor:
-                  type: number
-                  example: 50
-                  description: Valor que o cliente precisa pagar pelo serviço
       responses:
-        "201":
-          description: Cadastro realizado com sucesso!
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    default: Serviço criado com sucesso.
-                  servico:
-                    $ref: "#/components/schemas/Servicos"
-        "400":
-          description: O cadastro não foi bem-sucedido.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    default: Houve algo de errado ao criar o serviço.
-  /api/servicos/:{id}:
+        '200':
+          description: OK
+  /provided-services/pay/{id}:
+    patch:
+      tags:
+        - provided-service-controller
+      operationId: makePayment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+  /provided-services/complete-service/{id}:
+    patch:
+      tags:
+        - provided-service-controller
+      operationId: completeService
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+  /customers/{id}:
     get:
-      tags: [Servicos]
-      summary: Listagem de um serviço da retífica
-      operationId: listaServicoPeloId
+      tags:
+        - customer-controller
+      operationId: searchCustomerById
       parameters:
         - name: id
+          in: path
           required: true
           schema:
-            type: string
-          in: path
+            type: integer
+            format: int64
       responses:
-        "200":
-          description: Serviço listado com sucesso!
+        '200':
+          description: OK
           content:
-            application/json:
+            '*/*':
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Servicos"
-        "404":
-          description: Serviço não encontrado.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    default: "Serviço não encontrado."
-    put:
-      tags: [Servicos]
-      summary: Atualização de um serviço da retífica
-      operationId: atualizaServicoPeloId
-      parameters:
-        - name: id
-          required: true
-          schema:
-            type: string
-          in: path
-      responses:
-        "200":
-          description: Serviço atualizado com sucesso!
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Servicos"
-        "404":
-          description: Serviço não encontrado.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    default: "Serviço não encontrado."
+                $ref: '#/components/schemas/CustomerDTO'
     delete:
-      tags: [Servicos]
-      summary: Remoção de um serviço da retífica
-      operationId: removeServicoPeloId
+      tags:
+        - customer-controller
+      operationId: deleteCustomer
       parameters:
         - name: id
+          in: path
           required: true
           schema:
-            type: string
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+    patch:
+      tags:
+        - customer-controller
+      operationId: updateCustomer
+      parameters:
+        - name: id
           in: path
-      responses:
-        "204":
-          description: Serviço com status alterado para 'inativo'.
-        "404":
-          description: Serviço não encontrado.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    default: "Serviço não encontrado."
-  /api/servicosPrestados:
-    get:
-      tags: [ServicosPrestados]
-      summary: Listagem de serviços prestados pela retífica
-      operationId: listarServicosPrestados
-      responses:
-        "200":
-          description: Serviços prestados listados com sucesso!
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/ServicosPrestados"
-    post:
-      tags: [ServicosPrestados]
-      summary: Cadastro de um serviço prestado pela retífica
-      operationId: criarServicoPrestado
+          required: true
+          schema:
+            type: integer
+            format: int64
       requestBody:
-        description: Dados necessários para criar um novo serviço prestado
-        required: true
         content:
           application/json:
             schema:
-              type: object
-              required:
-                - id_servico
-                - id_cliente
-                - data_inicio
-              properties:
-                id_servico:
-                  type: string
-                  example: 123
-                  description: ID único do serviço
-                id_cliente:
-                  type: string
-                  example: 9
-                  description: ID único do cliente
-                data_inicio:
-                  type: string
-                  example: 2025-04-13
-                  description: Data de ínicio do serviço
-      responses:
-        "201":
-          description: Cadastro realizado com sucesso!
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    default: Serviço prestado criado com sucesso.
-                  servicoPrestado:
-                    $ref: "#/components/schemas/ServicosPrestados"
-        "400":
-          description: O cadastro não foi bem-sucedido.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    default: Houve algo de errado ao criar o serviço prestado.
-  /api/servicosPrestados/:{id}:
-    get:
-      tags: [ServicosPrestados]
-      summary: Listagem de um serviço presado pela retífica
-      operationId: listaServicoPrestadoPeloId
-      parameters:
-        - name: id
-          required: true
-          schema:
-            type: string
-          in: path
-      responses:
-        "200":
-          description: Serviço prestado listado com sucesso!
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/ServicosPrestados"
-        "404":
-          description: Serviço prestado não encontrado.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    default: "Serviço prestado não encontrado."
-    put:
-      tags: [ServicosPrestados]
-      summary: Atualização de um serviço prestado pela retífica
-      operationId: atualizaServicoPrestadoPeloId
-      parameters:
-        - name: id
-          required: true
-          schema:
-            type: string
-          in: path
-      responses:
-        "200":
-          description: Serviço prestado atualizado com sucesso!
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ServicosPrestados"
-        "404":
-          description: Serviço prestado não encontrado.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    default: "Serviço prestado não encontrado."
-    delete:
-      tags: [ServicosPrestados]
-      summary: Remoção de um serviço prestado da retífica
-      operationId: removeServicoPrestadoPeloId
-      parameters:
-        - name: id
-          required: true
-          schema:
-            type: string
-          in: path
-      responses:
-        "204":
-          description: Serviço prestado com status alterado para 'cancelado'.
-        "404":
-          description: Serviço não encontrado.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    default: "Serviço prestado não encontrado."
-  /api/enderecos:
-    get:
-      tags: [Enderecos]
-      summary: Listagem de endereços de clientes da retífica
-      operationId: listarEnderecos
-      responses:
-        "200":
-          description: Serviços prestados listados com sucesso!
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Enderecos"
-    post:
-      tags: [Enderecos]
-      summary: Cadastro de um endereço de cliente da retífica
-      operationId: criarEndereco
-      requestBody:
-        description: Dados necessários para criar um novo serviço prestado
+              $ref: '#/components/schemas/CustomerUpdateDTO'
         required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - id_cliente
-                - bairro
-                - cidade
-                - rua
-              properties:
-                id_cliente:
-                  type: string
-                  example: 9
-                  description: ID único do cliente
-                rua:
-                  type: string
-                  example: R. 7 de Setembro
-                  description: Rua ou avenida na qual o cliente reside
-                numero:
-                  type: number
-                  example: 7
-                  description: Número da casa ou apartamento
-                bairro:
-                  type: string
-                  example: Centro
-                  description: Bairro no qual o cliente reside
-                complemento:
-                  type: string
-                  example: Apartamento X em frente a Y.
-                  description: Complemento do endereço do cliente
-                cidade:
-                  type: string
-                  example: Campina Grande
-                  description: Cidade na qual o cliente reside
-                estado:
-                  type: string
-                  example: Paraíba
-                  description: Estado no qual o cliente reside
       responses:
-        "201":
-          description: Cadastro realizado com sucesso!
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    default: Endereço de cliente criado com sucesso.
-                  servicoPrestado:
-                    $ref: "#/components/schemas/Enderecos"
-        "400":
-          description: O cadastro não foi bem-sucedido.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    default: Houve algo de errado ao criar o endereço do cliente.
-  /api/enderecos/:{id}:
+        '200':
+          description: OK
+  /provided-services/{id}:
     get:
-      tags: [Enderecos]
-      summary: Listagem de um Endereço de cliente pela retífica
-      operationId: listaEnderecoPeloId
+      tags:
+        - provided-service-controller
+      operationId: findById
       parameters:
         - name: id
+          in: path
           required: true
           schema:
-            type: string
-          in: path
+            type: integer
+            format: int64
       responses:
-        "200":
-          description: Endereço de cliente listado com sucesso!
+        '200':
+          description: OK
           content:
-            application/json:
+            '*/*':
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Enderecos"
-        "404":
-          description: Endereço de cliente não encontrado.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    default: "Endereço de cliente não encontrado."
-    put:
-      tags: [Enderecos]
-      summary: Atualização de um Endereço de cliente pela retífica
-      operationId: atualizaEnderecoPeloId
-      parameters:
-        - name: id
-          required: true
-          schema:
-            type: string
-          in: path
-      responses:
-        "200":
-          description: Endereço de cliente atualizado com sucesso!
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Enderecos"
-        "404":
-          description: Endereço de cliente não encontrado.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    default: "Endereço de cliente não encontrado."
+                $ref: '#/components/schemas/ProvidedServiceResponse'
     delete:
-      tags: [Enderecos]
-      summary: Remoção de um Endereço de cliente da retífica
-      operationId: removeEnderecoPeloId
+      tags:
+        - provided-service-controller
+      operationId: delete
       parameters:
         - name: id
+          in: path
           required: true
           schema:
-            type: string
-          in: path
+            type: integer
+            format: int64
       responses:
-        "204":
-          description: Endereço de cliente com status alterado para 'cancelado'.
-        "404":
-          description: Endereço de cliente não encontrado.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    default: "Endereço de cliente não encontrado."
+        '200':
+          description: OK
 components:
   schemas:
-    Usuarios:
+    OfferedServiceRequest:
       type: object
       properties:
-        id:
+        name:
           type: string
-          description: ID único do usuário
-          example: "u812382391iseh1723dpu828123"
-        nome:
+        description:
           type: string
-          description: Nome do usuário
-          example: "Francinaldo"
-        senha:
-          type: string
-          description: Senha criptografada
-          example: "*******"
+        value:
+          type: number
       required:
-        - id
-        - nome
-        - senha
-    Clientes:
+        - description
+        - name
+        - value
+    OfferedServiceDTO:
       type: object
       properties:
         id:
+          type: integer
+          format: int64
+        name:
           type: string
-          description: ID único do usuário
-        primeiro_nome:
+        description:
           type: string
-          description: Primeiro nome do usuário
-        nome_do_meio:
+        value:
+          type: number
+    ProvidedServiceRequest:
+      type: object
+      properties:
+        serviceId:
+          type: integer
+          format: int64
+        customerId:
+          type: integer
+          format: int64
+        startDate:
           type: string
-          description: Nome do meio do usuário
-        ultimo_nome:
+          format: date-time
+        endDate:
           type: string
-          description: Último nome do usuário
-        documento:
+          format: date-time
+      required:
+        - customerId
+        - endDate
+        - serviceId
+        - startDate
+    ProvidedServiceResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        serviceName:
           type: string
-          description: CPF ou CNPJ do cliente
+        customerName:
+          type: string
+        startDate:
+          type: string
+          format: date-time
+        endDate:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum:
+            - PENDING
+            - IN_PROGRESS
+            - COMPLETED
+            - CANCELED
+        paid:
+          type: boolean
+    CustomerDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        firstName:
+          type: string
+          maxLength: 30
+          minLength: 0
+        middleName:
+          type: string
+          maxLength: 50
+          minLength: 0
+        lastName:
+          type: string
+          maxLength: 65
+          minLength: 0
+        document:
+          type: string
+          minLength: 1
         email:
           type: string
-          description: Email do cliente
-        telefone:
+          minLength: 1
+        telephone:
           type: string
-          description: Telefone do cliente
-        id_endereco:
-          type: string
-          description: Id do endereço do cliente
-        status:
-          type: string
-          description: Status do cliente
-          default: ativo
+          maxLength: 35
+          minLength: 0
       required:
-        - id
-        - primeiro_nome
-        - nome_do_meio
-        - ultimo_nome
-        - telefone
-        - id_endereco
-    Servicos:
+        - document
+        - email
+        - firstName
+        - lastName
+        - middleName
+        - telephone
+    UserLoginDTO:
       type: object
       properties:
-        id:
+        username:
           type: string
-          description: ID único do serviço
-        nome:
+          minLength: 1
+        password:
           type: string
-          description: Nome do serviço
-        descricao:
-          type: string
-          description: Descrição do serviço
-        valor:
-          type: number
-          description: Valor do serviço
-        status:
-          type: string
-          description: Status do serviço
+          minLength: 1
       required:
-        - id
-        - nome
-        - descricao
-        - valor
-    ServicosPrestados:
+        - password
+        - username
+    TokenDTO:
       type: object
       properties:
-        id_servico:
+        token:
           type: string
-          description: ID único do serviço
-        id_cliente:
+    CustomerUpdateDTO:
+      type: object
+      properties:
+        firstName:
           type: string
-          description: ID único do cliente
-        data_inicio:
+        middleName:
           type: string
-          description: Data de ínicio do serviço
-        data_fim:
+        lastName:
           type: string
-          description: Data de finalização do serviço. (Só é permitido que exista uma data_fim, se o status estiver no estado 'concluido'.)
-        status:
+        document:
           type: string
-          default: pendente
-          description: Status do serviço que será um enum [”pendente”, ”em andamento”, “concluído”, “cancelado”]
-        pago:
+        email:
+          type: string
+        telephone:
+          type: string
+    Pageable:
+      type: object
+      properties:
+        page:
+          type: integer
+          format: int32
+          minimum: 0
+        size:
+          type: integer
+          format: int32
+          minimum: 1
+        sort:
+          type: array
+          items:
+            type: string
+    PageOfferedServiceDTO:
+      type: object
+      properties:
+        totalPages:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
+        size:
+          type: integer
+          format: int32
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/OfferedServiceDTO'
+        number:
+          type: integer
+          format: int32
+        sort:
+          $ref: '#/components/schemas/SortObject'
+        numberOfElements:
+          type: integer
+          format: int32
+        first:
           type: boolean
-          default: false
-          description: O serviço foi pago?
-      required:
-        - id_servico
-        - id_cliente
-        - data_inicio
-    Enderecos:
+        last:
+          type: boolean
+        pageable:
+          $ref: '#/components/schemas/PageableObject'
+        empty:
+          type: boolean
+    PageableObject:
       type: object
       properties:
-        id:
-          type: string
-          description: ID único do endereço
-        id_cliente:
-          type: string
-          description: ID único do cliente
-        rua:
-          type: string
-          description: Rua ou avenida na qual o cliente reside
-        numero:
-          type: number
-          description: Número da casa ou apartamento
-        bairro:
-          type: string
-          description: Bairro no qual o cliente reside
-        complemento:
-          type: string
-          description: Complemento do endereço do cliente
-        cidade:
-          type: string
-          description: Cidade na qual o cliente reside
-        estado:
-          type: string
-          description: Estado no qual o cliente reside
-      required:
-        - id
-        - id_cliente
-        - rua
-        - bairro
-        - cidade
+        offset:
+          type: integer
+          format: int64
+        sort:
+          $ref: '#/components/schemas/SortObject'
+        paged:
+          type: boolean
+        pageSize:
+          type: integer
+          format: int32
+        pageNumber:
+          type: integer
+          format: int32
+        unpaged:
+          type: boolean
+    SortObject:
+      type: object
+      properties:
+        empty:
+          type: boolean
+        sorted:
+          type: boolean
+        unsorted:
+          type: boolean
+    PageProvidedServiceResponse:
+      type: object
+      properties:
+        totalPages:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
+        size:
+          type: integer
+          format: int32
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProvidedServiceResponse'
+        number:
+          type: integer
+          format: int32
+        sort:
+          $ref: '#/components/schemas/SortObject'
+        numberOfElements:
+          type: integer
+          format: int32
+        first:
+          type: boolean
+        last:
+          type: boolean
+        pageable:
+          $ref: '#/components/schemas/PageableObject'
+        empty:
+          type: boolean
+    PageCustomerDTO:
+      type: object
+      properties:
+        totalPages:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
+        size:
+          type: integer
+          format: int32
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomerDTO'
+        number:
+          type: integer
+          format: int32
+        sort:
+          $ref: '#/components/schemas/SortObject'
+        numberOfElements:
+          type: integer
+          format: int32
+        first:
+          type: boolean
+        last:
+          type: boolean
+        pageable:
+          $ref: '#/components/schemas/PageableObject'
+        empty:
+          type: boolean
