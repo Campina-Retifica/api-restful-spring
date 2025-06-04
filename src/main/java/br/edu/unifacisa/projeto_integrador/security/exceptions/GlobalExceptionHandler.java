@@ -1,4 +1,4 @@
-package br.edu.unifacisa.projeto_integrador.exceptions;
+package br.edu.unifacisa.projeto_integrador.security.exceptions;
 
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
@@ -30,10 +30,25 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(DuplicateResourceException.class)
+    public ResponseEntity<ExceptionMessage> handleDuplicateResourceException(DuplicateResourceException ex){
+        return new ResponseEntity<>(new ExceptionMessage(ex.getMessage()), HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(InactiveCustomerException.class)
+    public ResponseEntity<ExceptionMessage> handleInactiveCustomerException(InactiveCustomerException ex){
+        return new ResponseEntity<>(new ExceptionMessage(ex.getMessage()), HttpStatus.UNPROCESSABLE_ENTITY);
+    }
 
     public record DataErrorValidation(String field, String message) {
         public DataErrorValidation(FieldError error) {
             this(error.getField(), error.getDefaultMessage());
+        }
+    }
+
+    public record ExceptionMessage(String message) {
+        public ExceptionMessage(String message) {
+            this.message = message;
         }
     }
 }

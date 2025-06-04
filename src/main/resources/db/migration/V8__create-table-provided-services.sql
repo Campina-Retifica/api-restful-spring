@@ -1,0 +1,15 @@
+CREATE TABLE tb_provided_services (
+    id SERIAL PRIMARY KEY,
+    service_id BIGINT NOT NULL,
+    customer_id BIGINT NOT NULL,
+    start_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    end_date TIMESTAMP WITHOUT TIME ZONE,
+    status VARCHAR(50) NOT NULL DEFAULT 'IN_PROGRESS',
+    paid BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_provided_services_service FOREIGN KEY (service_id) REFERENCES tb_services(id) ON DELETE CASCADE,
+
+    CONSTRAINT fk_provided_services_customer FOREIGN KEY (customer_id) REFERENCES tb_customers(id) ON DELETE CASCADE
+);

@@ -1,5 +1,6 @@
-package br.edu.unifacisa.projeto_integrador.security;
+package br.edu.unifacisa.projeto_integrador.security.configurations;
 
+import br.edu.unifacisa.projeto_integrador.token.TokenService;
 import br.edu.unifacisa.projeto_integrador.user.UserRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -15,28 +16,42 @@ import java.io.IOException;
 
 @Component
 @RequiredArgsConstructor
-public class SecurityFilter extends OncePerRequestFilter {
-    private final JWTService jwtService;
+public class SecurityFilterConfiguration extends OncePerRequestFilter {
+    private final TokenService tokenService;
     private final UserRepository userRepository;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        var token = recoverToken(request);
-        if (token != null) {
-            var subject = jwtService.verify(token);
-            var user = userRepository.findByUsername(subject);
-            var authorities = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
+        try {
+            var token = recoverToken(request);
 
-            SecurityContextHolder.getContext().setAuthentication(authorities);
+            if (token != null) {
+                var authorities = checkAuthorizations(token);
+                SecurityContextHolder.getContext().setAuthentication(authorities);
+            }
+
+            filterChain.doFilter(request, response);
+
+        } catch (Exception e) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json");
+            response.getWriter().write("{\"error\": \"Invalid or expired token\"}");
         }
-        filterChain.doFilter(request, response);
     }
 
     private String recoverToken(HttpServletRequest request) {
         var authHeader = request.getHeader("Authorization");
+
         if (authHeader == null) {
             return null;
         }
+
         return authHeader.replace("Bearer ", "");
+    }
+
+    private UsernamePasswordAuthenticationToken checkAuthorizations(String token) {
+        var subject = tokenService.verify(token);
+        var user = userRepository.findByUsername(subject);
+        return new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
     }
 }
